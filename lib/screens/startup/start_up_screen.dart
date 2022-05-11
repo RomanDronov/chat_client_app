@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../all_chats_screen.dart';
-import '../register_screen.dart';
+import '../all_chats/all_chats_screen.dart';
+import '../register/register_screen.dart';
 import 'bloc/start_up_bloc.dart';
 
 class StartUpScreen extends StatelessWidget {
@@ -24,7 +24,7 @@ class StartUpScreen extends StatelessWidget {
             openAllChats: (OpenAllChatsStartUpPage state) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => AllChatsPage()),
+                MaterialPageRoute(builder: (_) => const AllChatsPage()),
               );
             },
           );

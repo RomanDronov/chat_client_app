@@ -2,7 +2,6 @@ part of 'start_up_bloc.dart';
 
 @freezed
 class StartUpState with _$StartUpState {
-
   const factory StartUpState.content() = ContentStartUpState;
 
   // Sync State: open Register Page.
