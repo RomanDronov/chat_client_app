@@ -5,7 +5,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../data/user_repository.dart';
 import '../../../models/chat_user.dart';
-import '../../../utils/chat_user_converter.dart';
 import '../../../utils/emitter_extensions.dart';
 
 part 'all_chats_event.dart';
@@ -14,10 +13,11 @@ part 'all_chats_bloc.freezed.dart';
 
 class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   final UserRepository _userRepository;
-  AllChatsBloc(this._userRepository) : super(AllChatsState.loading()) {
+  AllChatsBloc(this._userRepository) : super(const AllChatsState.loading()) {
     on<InitializedAllChatsEvent>(_onInitialized);
     on<UserPressedAllChatsEvent>(_onUserPressed);
     on<LogoutPressedAllChatsEvent>(_onLogoutPressed);
+    on<ProfilePressedAllChatEvent>(_onProfilePressed);
   }
 
   FutureOr<void> _onUserPressed(
@@ -43,6 +43,10 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
     Emitter<AllChatsState> emit,
   ) async {
     await _userRepository.logout();
-    emit.sync(state, AllChatsState.logout());
+    emit.sync(state, const AllChatsState.logout());
+  }
+
+  FutureOr<void> _onProfilePressed(ProfilePressedAllChatEvent event, Emitter<AllChatsState> emit) {
+    emit.sync(state, const AllChatsState.openProfile());
   }
 }

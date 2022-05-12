@@ -8,6 +8,7 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../../data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../models/message.dart';
+import '../../../utils/emitter_extensions.dart';
 
 part 'chat_bloc.freezed.dart';
 part 'chat_event.dart';
@@ -20,7 +21,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final serverUrl = 'http://127.0.0.1:3000';
   bool isLoading = true;
   late ChatUser receiver;
-  ChatBloc(this._userRepository) : super(ChatState.loading()) {
+  late ChatUser currentUser;
+  ChatBloc(this._userRepository) : super(const ChatState.loading()) {
     on<InitializedChatEvent>(_onInitialized);
     on<NewMessageChatEvent>(_onNewMessage);
     on<SendMessageChatEvent>(_onSendMessage);
@@ -32,7 +34,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentUser == null) {
       return;
     }
-    messages.add(Message(text, currentUser.chatID, receiverChatID));
     socketIO.emit(
       'send_message',
       json.encode(
@@ -55,21 +56,22 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return;
     }
 
-    socketIO = io.io('$serverUrl', {
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
+    socketIO = io.io(
+      serverUrl,
+      io.OptionBuilder()
+          .setTransports(['websocket']) // for Flutter or Dart VM
+          .disableAutoConnect() // disable auto-connection
+          .setExtraHeaders({'chatId': currentUser.chatID}) // optional
+          .build(),
+    );
 
     socketIO.on('receive_message', (jsonData) {
-      Map<String, dynamic> data = json.decode(jsonData);
       final Message message =
-          Message(data['content'], data['senderChatID'], data['receiverChatID']);
+          Message(jsonData['content'], jsonData['senderChatID'], jsonData['receiverChatID']);
       add(ChatEvent.newMessage(message: message));
     });
 
     socketIO.connect();
-    socketIO.onConnect((data) => print('Connected'));
-    print('Connected: ${socketIO.connected}');
   }
 
   FutureOr<void> _onInitialized(InitializedChatEvent event, Emitter<ChatState> emit) async {
@@ -77,16 +79,27 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentUser == null) {
       return;
     }
+    this.currentUser = currentUser;
     receiver = event.receiver;
     await _prepareSocket();
-    emit(ChatState.content(messages: messages, currentUserId: currentUser.chatID));
+    emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.chatID));
   }
 
   FutureOr<void> _onNewMessage(NewMessageChatEvent event, Emitter<ChatState> emit) {
     messages.add(event.message);
+    final contentState = ChatState.content(
+      content: ChatContent(List.from(messages, growable: false)),
+      currentUserId: currentUser.chatID,
+    );
+    final scrollState = ChatState.scrollToIndex(index: messages.length - 1);
+    emit.sync(contentState, scrollState);
   }
 
   FutureOr<void> _onSendMessage(SendMessageChatEvent event, Emitter<ChatState> emit) async {
-    await _sendMessage(event.text);
+    final String text = event.text.trim();
+    if (text.isEmpty) {
+      return;
+    }
+    await _sendMessage(text);
   }
 }

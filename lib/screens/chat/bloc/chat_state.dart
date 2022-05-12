@@ -4,8 +4,14 @@ part of 'chat_bloc.dart';
 class ChatState with _$ChatState {
   const factory ChatState.loading() = LoadingChatState;
   const factory ChatState.content({
-    required List<Message> messages,
+    required ChatContent content,
     required String currentUserId,
   }) = ContentChatState;
-  const factory ChatState.scrollToLatest() = ScrollToLatestChatState;
+  const factory ChatState.scrollToIndex({required int index}) = ScrollToLatestChatState;
+}
+
+class ChatContent {
+  final List<Message> messages;
+
+  ChatContent(this.messages);
 }

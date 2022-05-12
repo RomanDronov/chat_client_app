@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../main.dart';
 import '../all_chats/all_chats_screen.dart';
 import 'bloc/register_bloc.dart';
 
-class RegisterScreen extends StatelessWidget {
-  final _nameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _emailController = TextEditingController();
+class RegisterScreen extends HookWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
   //Place A
   @override
   Widget build(BuildContext context) {
+    final nameController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final emailController = useTextEditingController();
     return BlocProvider<RegisterBloc>(
       create: (_) => RegisterBloc(userRepository),
       child: BlocConsumer<RegisterBloc, RegisterState>(
@@ -52,7 +54,7 @@ class RegisterScreen extends StatelessWidget {
                         fillColor: Colors.grey[100],
                         hintText: 'Password',
                       ),
-                      controller: _passwordController,
+                      controller: passwordController,
                     ),
                     const SizedBox(
                       height: 16,
@@ -71,7 +73,7 @@ class RegisterScreen extends StatelessWidget {
                         fillColor: Colors.grey[100],
                         hintText: 'User Name',
                       ),
-                      controller: _nameController,
+                      controller: nameController,
                     ),
                     const SizedBox(
                       height: 16,
@@ -90,7 +92,7 @@ class RegisterScreen extends StatelessWidget {
                         fillColor: Colors.grey[100],
                         hintText: 'Email',
                       ),
-                      controller: _emailController,
+                      controller: emailController,
                     ),
                     const SizedBox(
                       height: 16,
@@ -102,9 +104,9 @@ class RegisterScreen extends StatelessWidget {
                         textColor: Colors.white,
                         padding: const EdgeInsets.all(16),
                         onPressed: () {
-                          final String email = _emailController.text.trim();
-                          final String name = _nameController.text.trim();
-                          final String password = _passwordController.text.trim();
+                          final String email = emailController.text.trim();
+                          final String name = nameController.text.trim();
+                          final String password = passwordController.text.trim();
                           context.read<RegisterBloc>().add(
                                 RegisterEvent.submitPressed(
                                   name: name,
@@ -123,13 +125,15 @@ class RegisterScreen extends StatelessWidget {
           );
         },
         listener: (BuildContext context, RegisterState state) {
-          state.mapOrNull(openAllChats: (_) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => AllChatsPage(),
-              ),
-            );
-          });
+          state.mapOrNull(
+            openAllChats: (_) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => const AllChatsPage(),
+                ),
+              );
+            },
+          );
         },
       ),
     );

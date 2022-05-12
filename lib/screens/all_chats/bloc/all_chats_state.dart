@@ -8,4 +8,5 @@ class AllChatsState with _$AllChatsState {
   /// Sync State: Open chat with [user].
   const factory AllChatsState.openChat({required ChatUser user}) = OpenChatAllChatsState;
   const factory AllChatsState.logout() = LogoutAllChatsState;
+  const factory AllChatsState.openProfile() = OpenProfileAllChatsState;
 }

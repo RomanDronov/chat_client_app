@@ -10,25 +10,58 @@ class NewMessage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController controller = useTextEditingController();
-    return Row(
-      children: <Widget>[
-        Container(
-          padding: const EdgeInsets.all(8),
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: TextField(
-            controller: controller,
+    final FocusNode focusNode = useFocusNode();
+
+    VoidCallback? initialize() {
+      focusNode.requestFocus();
+      return null;
+    }
+
+    useEffect(initialize, []);
+
+    return Material(
+      elevation: 16,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: FocusScope(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        label: Text('Message'),
+                      ),
+                      autofocus: true,
+                      controller: controller,
+                      focusNode: focusNode,
+                      onSubmitted: (text) {
+                        BlocProvider.of<ChatBloc>(context).add(ChatEvent.sendMessage(text: text));
+                        controller.clear();
+                        focusNode.requestFocus();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              FloatingActionButton(
+                mini: true,
+                onPressed: () {
+                  BlocProvider.of<ChatBloc>(context)
+                      .add(ChatEvent.sendMessage(text: controller.text));
+                  controller.clear();
+                },
+                elevation: 0,
+                child: const Icon(Icons.send),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 10.0),
-        FloatingActionButton(
-          onPressed: () {
-            BlocProvider.of<ChatBloc>(context).add(ChatEvent.sendMessage(text: controller.text));
-            controller.text = '';
-          },
-          elevation: 0,
-          child: const Icon(Icons.send),
-        ),
-      ],
+      ),
     );
   }
 }

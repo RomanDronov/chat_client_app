@@ -18,7 +18,7 @@ class StartUpScreen extends StatelessWidget {
             openRegister: (OpenRegisterStartUpState state) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => RegisterScreen()),
+                MaterialPageRoute(builder: (_) => const RegisterScreen()),
               );
             },
             openAllChats: (OpenAllChatsStartUpPage state) {

@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import '../models/chat_user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/chat_user.dart';
 import '../utils/chat_user_converter.dart';
 
 class UserRepository {
@@ -43,7 +40,7 @@ class UserRepository {
     final UserCredential credential = await auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
-    ).catchError(print);
+    );
     final User? user = credential.user;
     if (user == null) {
       return Future.error('User was not registered!');
@@ -80,16 +77,11 @@ class UserRepository {
     String password,
   ) async {
     final firestoreInstance = FirebaseFirestore.instance;
-
-    final currentUser = ChatUser(name: name, chatID: userId, phoneNumber: email);
-
     await firestoreInstance.collection('users').add({
       'name': name,
       'email': email,
       'password': password,
       'userid': userId,
-    }).then((value) {
-      print(value.id);
     });
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/bubble_type.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart';
-import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
+
+import '../../../design/widgets/message_tail.dart';
 
 class CurrentUserMessage extends StatelessWidget {
   const CurrentUserMessage({Key? key, required this.message}) : super(key: key);
@@ -9,18 +8,40 @@ class CurrentUserMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChatBubble(
-      clipper: ChatBubbleClipper1(type: BubbleType.receiverBubble),
-      backGroundColor: const Color(0xffE7E7ED),
-      margin: const EdgeInsets.only(top: 20),
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7,
-        ),
-        child: Text(
-          message,
-          style: const TextStyle(color: Colors.black),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8, left: 48, top: 2, bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      message,
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                    ),
+                  ),
+                ),
+                CustomPaint(painter: MessageTailShape(Theme.of(context).colorScheme.primary)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
