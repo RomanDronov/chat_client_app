@@ -15,8 +15,10 @@ class StartUpBloc extends Bloc<StartUpEvent, StartUpState> {
     on<StartedStartUpEvent>(_onStarted);
   }
 
-  FutureOr<void> _onStarted(StartedStartUpEvent event, Emitter<StartUpState> emit) {
+  FutureOr<void> _onStarted(StartedStartUpEvent event, Emitter<StartUpState> emit) async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
+
+    await Future.delayed(const Duration(seconds: 1));
 
     if (currentUser != null) {
       emit.sync(const StartUpState.content(), const StartUpState.openAllChats());
