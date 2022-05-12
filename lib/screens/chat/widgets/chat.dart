@@ -4,8 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../models/message.dart';
 import '../bloc/chat_bloc.dart';
-import 'other_user_message.dart';
 import 'current_user_message.dart';
+import 'other_user_message.dart';
 
 class Chat extends HookWidget {
   const Chat({Key? key}) : super(key: key);

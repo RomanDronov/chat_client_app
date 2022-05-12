@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../design/widgets/banner.dart';
+import '../../design/widgets/section_header.dart';
 import '../../main.dart';
 import '../../models/chat_user.dart';
+import '../../models/gender.dart';
 import '../chat/chat_page.dart';
 import '../profile/profile_screen.dart';
 import '../startup/start_up_screen.dart';
@@ -48,33 +51,47 @@ class AllChatsPage extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               },
               content: (ContentAllChatsState state) {
-                return ListView.separated(
-                  itemCount: state.users.length,
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 80, right: 16),
-                      child: Divider(height: 1),
-                    );
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    ChatUser user = state.users[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          radius: 24,
-                        ),
-                        title: Text(user.name),
-                        subtitle: Text('Last message'),
-                        onTap: () {
-                          AllChatsBloc bloc = BlocProvider.of(context);
-                          AllChatsEvent event = AllChatsEvent.userPressed(user: user);
-                          bloc.add(event);
-                        },
-                      ),
-                    );
-                  },
+                return ListView(
+                  children: [
+                    const DesignBanner(),
+                    const SectionHeader(title: 'Mates'),
+                    Column(
+                      children: [
+                        ...state.users.map((ChatUser user) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: AssetImage(
+                                      avatarProvider.getAssetNameByUsernameAndGender(
+                                          user.name, Gender.male),
+                                    ),
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    radius: 24,
+                                  ),
+                                  title: Text(user.name),
+                                  subtitle: const Text('Last message'),
+                                  onTap: () {
+                                    AllChatsBloc bloc = BlocProvider.of(context);
+                                    AllChatsEvent event = AllChatsEvent.userPressed(user: user);
+                                    bloc.add(event);
+                                  },
+                                ),
+                                if (state.users.last != user)
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 80, right: 16),
+                                    child: Divider(height: 1),
+                                  )
+                              ],
+                            ),
+                          );
+                        })
+                      ],
+                    ),
+                  ],
                 );
               },
               orElse: Container.new,

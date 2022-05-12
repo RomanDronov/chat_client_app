@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/chat_user.dart';
+import '../models/gender.dart';
 import '../utils/chat_user_converter.dart';
 
 class UserRepository {
@@ -31,7 +32,7 @@ class UserRepository {
     }
 
     return allUsers.firstWhere(
-      (element) => element.chatID == user.uid,
+      (element) => element.id == user.uid,
     );
   }
 
@@ -70,6 +71,18 @@ class UserRepository {
     return allUsers;
   }
 
+  Future<void> updateGender({required Gender gender}) async {
+    final ChatUser currentUser = await getCurrentUser(isForce: true);
+    final firestoreInstance = FirebaseFirestore.instance;
+    await firestoreInstance.collection('users').doc(currentUser.id).set(
+      {
+        'gender': gender.name,
+      },
+      SetOptions(merge: true),
+    );
+    await getCurrentUser(isForce: true);
+  }
+
   Future<void> _storeUserInfoInFirestore(
     String name,
     String email,
@@ -77,11 +90,12 @@ class UserRepository {
     String password,
   ) async {
     final firestoreInstance = FirebaseFirestore.instance;
-    await firestoreInstance.collection('users').add({
+    await firestoreInstance.collection('users').doc(userId).set({
       'name': name,
       'email': email,
       'password': password,
-      'userid': userId,
+      'id': userId,
+      'gender': Gender.cat.name,
     });
   }
 }

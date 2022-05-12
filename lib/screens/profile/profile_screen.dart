@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../design/widgets/section_header.dart';
 import '../../main.dart';
+import '../../models/gender.dart';
+import '../../utils/string.dart';
 import '../startup/start_up_screen.dart';
 import 'bloc/profile_bloc.dart';
+import 'gender_bottom_sheet.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -18,13 +21,8 @@ class ProfileScreen extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Profile'),
-              automaticallyImplyLeading: false,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
+              automaticallyImplyLeading: true,
+              
             ),
             body: state.maybeMap(
               initial: (InitialProfileState state) {
@@ -35,8 +33,16 @@ class ProfileScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
-                      const CircleAvatar(
-                        radius: 64,
+                      Center(
+                        child: CircleAvatar(
+                          radius: 64,
+                          backgroundImage: AssetImage(
+                            avatarProvider.getAssetNameByUsernameAndGender(
+                              state.user.name,
+                              state.user.gender,
+                            ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -45,12 +51,30 @@ class ProfileScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline4,
                       ),
                       Text(
-                        state.user.phoneNumber,
+                        state.user.email,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 24),
                       const SectionHeader(title: 'Settings'),
+                      ListTile(
+                        leading: const Icon(Icons.female),
+                        title: Text(state.user.gender.name.capitalize()),
+                        subtitle: const Text('Gender'),
+                        trailing: const Icon(Icons.navigate_next),
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (_) => GenderBottomSheet(
+                              onGenderSelected: (Gender gender) {
+                                context
+                                    .read<ProfileBloc>()
+                                    .add(ProfileEvent.genderChanged(gender: gender));
+                              },
+                            ),
+                          );
+                        },
+                      ),
                       ListTile(
                         leading: const Icon(Icons.logout),
                         title: const Text('Log out'),

@@ -18,6 +18,7 @@ class ChatPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(user.name),
+          automaticallyImplyLeading: true,
         ),
         bottomNavigationBar: const NewMessage(),
         body: const Chat(),

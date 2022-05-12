@@ -29,7 +29,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   FutureOr<void> _sendMessage(String text) async {
-    final String receiverChatID = receiver.chatID;
+    final String receiverChatID = receiver.id;
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
     if (currentUser == null) {
       return;
@@ -39,7 +39,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       json.encode(
         {
           'receiverChatID': receiverChatID,
-          'senderChatID': currentUser.chatID,
+          'senderChatID': currentUser.id,
           'content': text,
         },
       ),
@@ -59,9 +59,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     socketIO = io.io(
       serverUrl,
       io.OptionBuilder()
-          .setTransports(['websocket']) // for Flutter or Dart VM
-          .disableAutoConnect() // disable auto-connection
-          .setExtraHeaders({'chatId': currentUser.chatID}) // optional
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .setExtraHeaders({'chatId': currentUser.id})
           .build(),
     );
 
@@ -82,14 +82,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this.currentUser = currentUser;
     receiver = event.receiver;
     await _prepareSocket();
-    emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.chatID));
+    emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.id));
   }
 
   FutureOr<void> _onNewMessage(NewMessageChatEvent event, Emitter<ChatState> emit) {
     messages.add(event.message);
     final contentState = ChatState.content(
       content: ChatContent(List.from(messages, growable: false)),
-      currentUserId: currentUser.chatID,
+      currentUserId: currentUser.id,
     );
     final scrollState = ChatState.scrollToIndex(index: messages.length - 1);
     emit.sync(contentState, scrollState);

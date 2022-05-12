@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/bubble_type.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart';
-import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
 
 import '../../../design/widgets/message_tail.dart';
 
@@ -64,7 +61,7 @@ class OtherUserMessageBubble extends StatelessWidget {
                     ),
                     child: Text(
                       message,
-                      style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                      style: Theme.of(context).textTheme.subtitle1?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),

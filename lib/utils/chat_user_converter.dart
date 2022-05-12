@@ -1,11 +1,20 @@
 import '../models/chat_user.dart';
+import '../models/gender.dart';
 
 class ChatUserConverter {
   ChatUser convertOrNull(Map<String, dynamic> data) {
+    final String name = data['name'] ?? '';
+    final String email = data['email'] ?? '';
+    final String userId = data['id'] ?? '';
+    final String gender = data['gender'] ?? '';
     return ChatUser(
-      name: data['name'],
-      chatID: data['userid'],
-      phoneNumber: data['email'],
+      name: name,
+      id: userId,
+      email: email,
+      gender: Gender.values.firstWhere(
+        (element) => element.name == gender,
+        orElse: () => Gender.cat,
+      ),
     );
   }
 }

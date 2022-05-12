@@ -34,7 +34,7 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
     final List<ChatUser> users = await _userRepository.getAllUsers(isForce: true);
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
     final List<ChatUser> friends =
-        users.where((user) => user.chatID != currentUser?.chatID).toList();
+        users.where((user) => user.id != currentUser?.id).toList();
     emit(AllChatsState.content(users: friends));
   }
 
