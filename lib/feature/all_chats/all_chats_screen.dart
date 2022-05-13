@@ -8,7 +8,7 @@ import '../../models/chat_user.dart';
 import '../../models/gender.dart';
 import '../chat/chat_page.dart';
 import '../profile/profile_screen.dart';
-import '../startup/start_up_screen.dart';
+import '../start_up/start_up_screen.dart';
 import 'bloc/all_chats_bloc.dart';
 
 class AllChatsPage extends StatelessWidget {
@@ -103,11 +103,14 @@ class AllChatsPage extends StatelessWidget {
         listener: (BuildContext context, AllChatsState state) {
           state.mapOrNull(
             openChat: (OpenChatAllChatsState state) => _openChat(context, state.user),
-            logout: (_) => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const StartUpScreen(),
-              ),
-            ),
+            logout: (_) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => const StartUpScreen(),
+                ),
+                (route) => false,
+              );
+            },
             openProfile: (_) => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const ProfileScreen(),

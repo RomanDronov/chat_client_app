@@ -23,7 +23,7 @@ class StartUpBloc extends Bloc<StartUpEvent, StartUpState> {
     if (currentUser != null) {
       emit.sync(const StartUpState.content(), const StartUpState.openAllChats());
     } else {
-      emit.sync(const StartUpState.content(), const StartUpState.openRegister());
+      emit.sync(const StartUpState.content(), const StartUpState.openSignIn());
     }
   }
 }

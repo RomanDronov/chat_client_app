@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/chat_user.dart';
 import '../../models/gender.dart';
 import '../../utils/chat_user_converter.dart';
+import 'sign_in_result.dart';
 
 class UserRepository {
   final ChatUserConverter _chatUserConverter;
@@ -34,6 +35,25 @@ class UserRepository {
     return allUsers.firstWhere(
       (element) => element.id == user.uid,
     );
+  }
+
+  Future<SignInResult> signIn(String email, String password) async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    try {
+      final credential = await auth.signInWithEmailAndPassword(email: email, password: password);
+      return const SignInResult.success();
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          return const SignInResult.invalidEmail();
+        case 'user-not-found':
+          return const SignInResult.userNotFound();
+        case 'wrong-password':
+          return const SignInResult.wrongPassword();
+        default:
+          return const SignInResult.unknownFailure();
+      }
+    }
   }
 
   Future<ChatUser> registerUser(String email, String password, String name) async {

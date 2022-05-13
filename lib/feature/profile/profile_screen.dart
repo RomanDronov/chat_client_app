@@ -5,7 +5,7 @@ import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
 import '../../models/gender.dart';
 import '../../utils/string.dart';
-import '../startup/start_up_screen.dart';
+import '../start_up/start_up_screen.dart';
 import 'bloc/profile_bloc.dart';
 import 'gender_bottom_sheet.dart';
 
@@ -22,7 +22,6 @@ class ProfileScreen extends StatelessWidget {
             appBar: AppBar(
               title: const Text('Profile'),
               automaticallyImplyLeading: true,
-              
             ),
             body: state.maybeMap(
               initial: (InitialProfileState state) {
@@ -95,11 +94,14 @@ class ProfileScreen extends StatelessWidget {
         },
         listener: (BuildContext context, ProfileState state) {
           state.mapOrNull(
-            logout: (_) => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const StartUpScreen(),
-              ),
-            ),
+            logout: (_) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => const StartUpScreen(),
+                ),
+                (route) => false,
+              );
+            },
           );
         },
       ),

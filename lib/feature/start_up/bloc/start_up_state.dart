@@ -5,7 +5,7 @@ class StartUpState with _$StartUpState {
   const factory StartUpState.content() = ContentStartUpState;
 
   // Sync State: open Register Page.
-  const factory StartUpState.openRegister() = OpenRegisterStartUpState;
+  const factory StartUpState.openSignIn() = OpenSignInStartUpState;
 
   // Sync State: open All Chats Page.
   const factory StartUpState.openAllChats() = OpenAllChatsStartUpPage;
