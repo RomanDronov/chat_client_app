@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../design/widgets/section_header.dart';
+import '../../core/design/widgets/section_header.dart';
 import '../../models/gender.dart';
 import '../../utils/string.dart';
 

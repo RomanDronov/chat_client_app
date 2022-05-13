@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../design/widgets/message_tail.dart';
+import '../../../core/design/widgets/message_tail.dart';
 
 class CurrentUserMessage extends StatelessWidget {
   const CurrentUserMessage({Key? key, required this.message}) : super(key: key);

@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import '../../../data/user_repository.dart';
+import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../models/message.dart';
 import '../../../utils/emitter_extensions.dart';

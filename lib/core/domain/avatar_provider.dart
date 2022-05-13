@@ -1,4 +1,5 @@
-import '../models/gender.dart';
+
+import '../../models/gender.dart';
 
 class AvatarProvider {
   String getAssetNameByUsernameAndGender(String username, Gender gender) {

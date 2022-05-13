@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../design/widgets/message_tail.dart';
+import '../../../core/design/widgets/message_tail.dart';
 
 class OtherUserMessage extends StatelessWidget {
   const OtherUserMessage({Key? key, required this.message}) : super(key: key);

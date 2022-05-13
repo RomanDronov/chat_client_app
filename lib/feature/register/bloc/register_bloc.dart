@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../data/user_repository.dart';
+import '../../../core/data/user_repository.dart';
 import '../../../utils/emitter_extensions.dart';
 
 part 'register_event.dart';

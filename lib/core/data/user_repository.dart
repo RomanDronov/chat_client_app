@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/chat_user.dart';
-import '../models/gender.dart';
-import '../utils/chat_user_converter.dart';
+import '../../models/chat_user.dart';
+import '../../models/gender.dart';
+import '../../utils/chat_user_converter.dart';
 
 class UserRepository {
   final ChatUserConverter _chatUserConverter;

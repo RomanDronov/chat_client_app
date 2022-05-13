@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../data/user_repository.dart';
+import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
 

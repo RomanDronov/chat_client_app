@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../design/widgets/section_header.dart';
+import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
 import '../../models/gender.dart';
 import '../../utils/string.dart';

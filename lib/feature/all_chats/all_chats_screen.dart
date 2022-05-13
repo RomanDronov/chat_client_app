@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../design/widgets/banner.dart';
-import '../../design/widgets/section_header.dart';
+import '../../core/design/widgets/banner.dart';
+import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
 import '../../models/chat_user.dart';
 import '../../models/gender.dart';
@@ -67,7 +67,9 @@ class AllChatsPage extends StatelessWidget {
                                   leading: CircleAvatar(
                                     backgroundImage: AssetImage(
                                       avatarProvider.getAssetNameByUsernameAndGender(
-                                          user.name, Gender.male),
+                                        user.name,
+                                        Gender.male,
+                                      ),
                                     ),
                                     backgroundColor: Theme.of(context).colorScheme.primary,
                                     radius: 24,
