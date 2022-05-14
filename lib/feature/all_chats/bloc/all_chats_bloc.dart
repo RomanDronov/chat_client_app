@@ -35,7 +35,9 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
     final List<ChatUser> friends = users.where((user) => user.id != currentUser?.id).toList();
     emit(AllChatsState.content(users: friends));
     await Future.delayed(const Duration(seconds: 5));
-    add(event);
+    if (!isClosed) {
+      add(event);
+    }
   }
 
   FutureOr<void> _onProfilePressed(ProfilePressedAllChatEvent event, Emitter<AllChatsState> emit) {

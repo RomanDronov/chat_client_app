@@ -89,6 +89,7 @@ class _TextField extends StatelessWidget {
       decoration: InputDecoration(
         label: Text(label),
         errorText: error,
+        isDense: true,
       ),
       enabled: isEnabled,
       keyboardType: keyboardType,
