@@ -66,7 +66,7 @@ class UserRepository {
     if (user == null) {
       return Future.error('User was not registered!');
     }
-    await _storeUserInfoInFirestore(name, email, user.uid, password);
+    await _storeUserInfoInFirestore(name, email, user.uid);
     return getCurrentUser(isForce: true);
   }
 
@@ -107,13 +107,11 @@ class UserRepository {
     String name,
     String email,
     String userId,
-    String password,
   ) async {
     final firestoreInstance = FirebaseFirestore.instance;
     await firestoreInstance.collection('users').doc(userId).set({
       'name': name,
       'email': email,
-      'password': password,
       'id': userId,
       'gender': Gender.cat.name,
     });

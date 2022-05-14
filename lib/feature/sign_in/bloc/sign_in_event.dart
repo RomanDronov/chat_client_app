@@ -6,5 +6,4 @@ class SignInEvent with _$SignInEvent {
     required String email,
     required String password,
   }) = SignInPressedSignInEvent;
-  const factory SignInEvent.signUpPressed() = SignUpPressedSignInEvent;
 }

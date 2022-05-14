@@ -6,7 +6,10 @@ class SignInState with _$SignInState {
     required bool isLoading,
   }) = ContentSignInState;
 
-  const factory SignInState.openSignUp() = OpenSignUpSignInState;
+  const factory SignInState.openSignUp({
+    required String email,
+    required String password,
+  }) = OpenSignUpSignInState;
   const factory SignInState.openAllChats() = OpenAllChatsSignInState;
   const factory SignInState.showEmailFailure({
     required String failure,
@@ -14,4 +17,8 @@ class SignInState with _$SignInState {
   const factory SignInState.showPasswordFailure({
     required String failure,
   }) = ShowPasswordFailureSignInState;
+  const factory SignInState.showWarning({
+    required String title,
+    required String description,
+  }) = ShowWarningSignInState;
 }

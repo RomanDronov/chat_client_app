@@ -14,7 +14,10 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ChatBloc(userRepository)..add(ChatEvent.initialized(receiver: user)),
+      create: (context) => ChatBloc(
+        userRepository,
+        configRepository,
+      )..add(ChatEvent.initialized(receiver: user)),
       child: Scaffold(
         appBar: AppBar(
           title: Text(user.name),

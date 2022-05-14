@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/design/theme/theme.dart';
-import '../feature/sign_in/sign_in_screen.dart';
+import '../feature/start_up/start_up_screen.dart';
 
 class ChatApp extends StatelessWidget {
   const ChatApp({Key? key}) : super(key: key);
@@ -10,7 +10,7 @@ class ChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const SignInScreen(),
+      home: const StartUpScreen(),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,

@@ -15,7 +15,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   final UserRepository _userRepository;
   SignInBloc(this._userRepository) : super(const SignInState.content(isLoading: false)) {
     on<SignInPressedSignInEvent>(_onSignInPressed);
-    on<SignUpPressedSignInEvent>(_onSignUpPressed);
   }
 
   FutureOr<void> _onSignInPressed(SignInPressedSignInEvent event, Emitter<SignInState> emit) async {
@@ -50,13 +49,22 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
       wrongPassword: () {
         emit.sync(state, const SignInState.showPasswordFailure(failure: 'This password is wrong'));
       },
-      userNotFound: () {},
-      unknownFailure: () {},
+      userNotFound: () {
+        emit.sync(
+          const SignInState.content(isLoading: false),
+          SignInState.openSignUp(email: email, password: password),
+        );
+      },
+      unknownFailure: () {
+        emit.sync(
+          state,
+          const SignInState.showWarning(
+            title: 'Something went wrong',
+            description: 'Please try again or do it later',
+          ),
+        );
+      },
     );
-  }
-
-  FutureOr<void> _onSignUpPressed(SignUpPressedSignInEvent event, Emitter<SignInState> emit) {
-    emit.sync(state, const SignInState.openSignUp());
   }
 
   String? _getEmailFailureOrNull(String email) {

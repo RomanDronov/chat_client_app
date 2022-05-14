@@ -7,16 +7,15 @@ import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
 
+part 'all_chats_bloc.freezed.dart';
 part 'all_chats_event.dart';
 part 'all_chats_state.dart';
-part 'all_chats_bloc.freezed.dart';
 
 class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   final UserRepository _userRepository;
   AllChatsBloc(this._userRepository) : super(const AllChatsState.loading()) {
     on<InitializedAllChatsEvent>(_onInitialized);
     on<UserPressedAllChatsEvent>(_onUserPressed);
-    on<LogoutPressedAllChatsEvent>(_onLogoutPressed);
     on<ProfilePressedAllChatEvent>(_onProfilePressed);
   }
 
@@ -33,17 +32,10 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   ) async {
     final List<ChatUser> users = await _userRepository.getAllUsers(isForce: true);
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
-    final List<ChatUser> friends =
-        users.where((user) => user.id != currentUser?.id).toList();
+    final List<ChatUser> friends = users.where((user) => user.id != currentUser?.id).toList();
     emit(AllChatsState.content(users: friends));
-  }
-
-  FutureOr<void> _onLogoutPressed(
-    LogoutPressedAllChatsEvent event,
-    Emitter<AllChatsState> emit,
-  ) async {
-    await _userRepository.logout();
-    emit.sync(state, const AllChatsState.logout());
+    await Future.delayed(const Duration(seconds: 5));
+    add(event);
   }
 
   FutureOr<void> _onProfilePressed(ProfilePressedAllChatEvent event, Emitter<AllChatsState> emit) {

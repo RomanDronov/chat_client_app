@@ -5,11 +5,11 @@ import '../../core/design/widgets/banner.dart';
 import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
 import '../../models/chat_user.dart';
-import '../../models/gender.dart';
 import '../chat/chat_page.dart';
 import '../profile/profile_screen.dart';
-import '../start_up/start_up_screen.dart';
 import 'bloc/all_chats_bloc.dart';
+import 'mates_list.dart';
+import 'no_mates_yet.dart';
 
 class AllChatsPage extends StatelessWidget {
   const AllChatsPage({Key? key}) : super(key: key);
@@ -23,7 +23,6 @@ class AllChatsPage extends StatelessWidget {
           loading: (_) => true,
           content: (_) => true,
           openChat: (_) => false,
-          logout: (_) => false,
           openProfile: (_) => false,
         ),
         builder: (BuildContext context, AllChatsState state) {
@@ -37,14 +36,6 @@ class AllChatsPage extends StatelessWidget {
                   context.read<AllChatsBloc>().add(const AllChatsEvent.profilePressed());
                 },
               ),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    context.read<AllChatsBloc>().add(const AllChatsEvent.logoutPressed());
-                  },
-                  icon: const Icon(Icons.logout),
-                ),
-              ],
             ),
             body: state.maybeMap(
               loading: (LoadingAllChatsState state) {
@@ -55,44 +46,10 @@ class AllChatsPage extends StatelessWidget {
                   children: [
                     const DesignBanner(),
                     const SectionHeader(title: 'Mates'),
-                    Column(
-                      children: [
-                        ...state.users.map((ChatUser user) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                      avatarProvider.getAssetNameByUsernameAndGender(
-                                        user.name,
-                                        Gender.male,
-                                      ),
-                                    ),
-                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                    radius: 24,
-                                  ),
-                                  title: Text(user.name),
-                                  subtitle: const Text('Last message'),
-                                  onTap: () {
-                                    AllChatsBloc bloc = BlocProvider.of(context);
-                                    AllChatsEvent event = AllChatsEvent.userPressed(user: user);
-                                    bloc.add(event);
-                                  },
-                                ),
-                                if (state.users.last != user)
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 80, right: 16),
-                                    child: Divider(height: 1),
-                                  )
-                              ],
-                            ),
-                          );
-                        })
-                      ],
-                    ),
+                    if (state.users.isNotEmpty)
+                      MatesList(users: state.users)
+                    else
+                      const NoMatesYet(),
                   ],
                 );
               },
@@ -103,14 +60,6 @@ class AllChatsPage extends StatelessWidget {
         listener: (BuildContext context, AllChatsState state) {
           state.mapOrNull(
             openChat: (OpenChatAllChatsState state) => _openChat(context, state.user),
-            logout: (_) {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (context) => const StartUpScreen(),
-                ),
-                (route) => false,
-              );
-            },
             openProfile: (_) => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const ProfileScreen(),

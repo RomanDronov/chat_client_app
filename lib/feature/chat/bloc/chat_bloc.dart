@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../../../core/data/config_repository.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../models/message.dart';
@@ -16,13 +17,13 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final UserRepository _userRepository;
+  final ConfigRepository _configRepository;
   List<Message> messages = <Message>[];
   late io.Socket socketIO;
-  final serverUrl = 'http://127.0.0.1:3000';
   bool isLoading = true;
   late ChatUser receiver;
   late ChatUser currentUser;
-  ChatBloc(this._userRepository) : super(const ChatState.loading()) {
+  ChatBloc(this._userRepository, this._configRepository) : super(const ChatState.loading()) {
     on<InitializedChatEvent>(_onInitialized);
     on<NewMessageChatEvent>(_onNewMessage);
     on<SendMessageChatEvent>(_onSendMessage);
@@ -57,7 +58,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
 
     socketIO = io.io(
-      serverUrl,
+      _configRepository.getChatHost(),
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
