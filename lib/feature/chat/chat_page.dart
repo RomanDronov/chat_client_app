@@ -23,8 +23,14 @@ class ChatPage extends StatelessWidget {
           title: Text(user.name),
           automaticallyImplyLeading: true,
         ),
-        bottomNavigationBar: const NewMessage(),
-        body: const Chat(),
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: const [
+            Expanded(child: Chat()),
+            NewMessage(),
+          ],
+        ),
       ),
     );
   }

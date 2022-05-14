@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/data/user_repository.dart';
+import '../../../main.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
 
@@ -31,9 +32,22 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
     Emitter<AllChatsState> emit,
   ) async {
     final List<ChatUser> users = await _userRepository.getAllUsers(isForce: true);
-    final ChatUser? currentUser = await _userRepository.getCurrentUser();
-    final List<ChatUser> friends = users.where((user) => user.id != currentUser?.id).toList();
-    emit(AllChatsState.content(users: friends));
+    try {
+      final ChatUser? currentUser = await _userRepository.getCurrentUser();
+      final List<ChatUser> friends = users.where((user) => user.id != currentUser?.id).toList();
+      emit(AllChatsState.content(users: friends));
+    } catch (exception) {
+      logger.w('User is not logged in!');
+      emit.sync(
+        state,
+        AllChatsState.showWarningAlert(
+          title: 'Something went wrong',
+          description: 'Please try again or do it later',
+          retryEvent: event,
+        ),
+      );
+      return;
+    }
     await Future.delayed(const Duration(seconds: 5));
     if (!isClosed) {
       add(event);

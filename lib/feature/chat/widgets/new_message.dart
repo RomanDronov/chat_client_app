@@ -39,6 +39,7 @@ class NewMessage extends HookWidget {
                       autofocus: true,
                       controller: controller,
                       focusNode: focusNode,
+                      textInputAction: TextInputAction.send,
                       onSubmitted: (text) {
                         BlocProvider.of<ChatBloc>(context).add(ChatEvent.sendMessage(text: text));
                         controller.clear();

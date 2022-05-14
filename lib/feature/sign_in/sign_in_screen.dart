@@ -52,6 +52,10 @@ class SignInScreen extends HookWidget {
                 type: AlertType.warning,
                 title: state.title,
                 description: state.description,
+                firstButton: AlertButton(
+                  label: 'Got it',
+                  onPressed: () {},
+                ),
               );
               showDesignAlert(context, description);
             },

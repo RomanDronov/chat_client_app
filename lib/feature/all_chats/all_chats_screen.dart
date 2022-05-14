@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/design/alert/alert.dart';
+import '../../core/design/alert/alert_description.dart';
 import '../../core/design/widgets/banner.dart';
 import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
@@ -24,6 +26,7 @@ class AllChatsPage extends StatelessWidget {
           content: (_) => true,
           openChat: (_) => false,
           openProfile: (_) => false,
+          showWarningAlert: (_) => false,
         ),
         builder: (BuildContext context, AllChatsState state) {
           return Scaffold(
@@ -65,6 +68,21 @@ class AllChatsPage extends StatelessWidget {
                 builder: (context) => const ProfileScreen(),
               ),
             ),
+            showWarningAlert: (state) {
+              final AlertDescription description = AlertDescription(
+                type: AlertType.warning,
+                title: state.title,
+                description: state.description,
+                isDismissible: false,
+                firstButton: AlertButton(
+                  label: 'Try again',
+                  onPressed: () {
+                    context.read<AllChatsBloc>().add(state.retryEvent);
+                  },
+                ),
+              );
+              showDesignAlert(context, description);
+            },
           );
         },
       ),

@@ -9,6 +9,7 @@ class DesignAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AlertButton? secondButton = description.secondButton;
     return WillPopScope(
       onWillPop: () async => description.isDismissible,
       child: Padding(
@@ -35,12 +36,11 @@ class DesignAlert extends StatelessWidget {
                       description.description,
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
-                    MaterialButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    description.firstButton.toAlertButton(context),
+                    if (secondButton != null) ...[
+                      const SizedBox(height: 8),
+                      secondButton.toAlertButton(context),
+                    ]
                   ],
                 ),
               ),
@@ -74,4 +74,16 @@ Future<dynamic> showDesignAlert(BuildContext context, AlertDescription descripti
       description: description,
     ),
   );
+}
+
+extension _AlertButtonExtension on AlertButton {
+  Widget toAlertButton(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        onPressed.call();
+        Navigator.of(context).pop();
+      },
+      child: Text(label),
+    );
+  }
 }
