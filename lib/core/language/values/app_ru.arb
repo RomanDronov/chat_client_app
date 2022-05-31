@@ -1,0 +1,14 @@
+{
+    "appName": "Добрососедство",
+    "logOut": "Выйти из аккаунта",
+    "settings": "Настройки",
+    "gender": "Пол",
+    "genderMale": "Мужчина",
+    "genderFemale": "Женщина",
+    "genderCat": "Котик",
+    "language": "Язык",
+    "languageRussian": "Русский",
+    "languageEnglish": "Английский",
+    "profile": "Профиль",
+    "allChats": "Добрососедство"
+}

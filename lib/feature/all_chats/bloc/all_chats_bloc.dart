@@ -4,54 +4,57 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/data/user_repository.dart';
-import '../../../main.dart';
+import '../../../core/util/stream_socket.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
+import '../domain/all_chats_service.dart';
+import '../models/domain/all_chats_details.dart';
+import '../models/domain/get_all_chats_details_result.dart';
 
 part 'all_chats_bloc.freezed.dart';
 part 'all_chats_event.dart';
 part 'all_chats_state.dart';
 
 class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
+  final AllChatsService _service;
   final UserRepository _userRepository;
-  AllChatsBloc(this._userRepository) : super(const AllChatsState.loading()) {
+  AllChatsBloc(this._service, this._userRepository) : super(const AllChatsState.loading()) {
     on<InitializedAllChatsEvent>(_onInitialized);
-    on<UserPressedAllChatsEvent>(_onUserPressed);
+    on<RecipientPressedAllChatsEvent>(_onUserPressed);
     on<ProfilePressedAllChatEvent>(_onProfilePressed);
   }
 
   FutureOr<void> _onUserPressed(
-    UserPressedAllChatsEvent event,
+    RecipientPressedAllChatsEvent event,
     Emitter<AllChatsState> emit,
   ) {
-    emit.sync(state, AllChatsState.openChat(user: event.user));
+    emit.sync(state, AllChatsState.openChat(recipient: event.recipient, chatId: event.chatId));
   }
 
   FutureOr<void> _onInitialized(
     InitializedAllChatsEvent event,
     Emitter<AllChatsState> emit,
   ) async {
-    final List<ChatUser> users = await _userRepository.getAllUsers(isForce: true);
-    try {
-      final ChatUser? currentUser = await _userRepository.getCurrentUser();
-      final List<ChatUser> friends = users.where((user) => user.id != currentUser?.id).toList();
-      emit(AllChatsState.content(users: friends));
-    } catch (exception) {
-      logger.w('User is not logged in!');
-      emit.sync(
-        state,
-        AllChatsState.showWarningAlert(
-          title: 'Something went wrong',
-          description: 'Please try again or do it later',
-          retryEvent: event,
-        ),
-      );
-      return;
-    }
-    await Future.delayed(const Duration(seconds: 5));
-    if (!isClosed) {
-      add(event);
-    }
+    emit(const AllChatsState.loading());
+    final ChatUser user = await _userRepository.getCurrentUser(isForce: false);
+    final PayloadStream<GetAllChatsDetailsResult> payloadStream =
+        await _service.subscribeToDetails();
+    await emit.forEach<GetAllChatsDetailsResult>(
+      payloadStream.getPayload,
+      onData: (GetAllChatsDetailsResult result) {
+        return result.map(
+          success: (result) => AllChatsState.content(
+            details: result.details,
+            currentUserId: user.id,
+            currentUserName: user.name,
+          ),
+          failure: (_) {
+            payloadStream.dispose();
+            return const AllChatsState.failure();
+          },
+        );
+      },
+    );
   }
 
   FutureOr<void> _onProfilePressed(ProfilePressedAllChatEvent event, Emitter<AllChatsState> emit) {

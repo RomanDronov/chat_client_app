@@ -21,6 +21,7 @@ class NewMessage extends HookWidget {
 
     return Material(
       elevation: 16,
+      color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),

@@ -1,0 +1,14 @@
+{
+    "appName": "Neighborhood",
+    "logOut": "Log out",
+    "settings": "Settings",
+    "gender": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderCat": "Kitty",
+    "language": "Language",
+    "languageRussian": "Russian",
+    "languageEnglish": "English",
+    "profile": "Profile",
+    "allChats": "Neighborhood"
+}

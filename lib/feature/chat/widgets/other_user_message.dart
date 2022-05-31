@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/widgets/message_tail.dart';
+import '../../../main.dart';
+import '../../all_chats/models/domain/all_chats_details.dart';
 
 class OtherUserMessage extends StatelessWidget {
-  const OtherUserMessage({Key? key, required this.message}) : super(key: key);
+  const OtherUserMessage({
+    Key? key,
+    required this.message,
+    required this.author,
+  }) : super(key: key);
   final String message;
+  final Author author;
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +20,16 @@ class OtherUserMessage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(width: 8),
-        const CircleAvatar(
-          radius: 12,
-          backgroundColor: Colors.amber,
+        CircleAvatar(
+        backgroundImage: AssetImage(
+          avatarProvider.getAssetNameByUsernameAndGender(
+            author.name,
+            author.gender,
+          ),
         ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        radius: 16,
+      ),
         const SizedBox(width: 4),
         Flexible(
           fit: FlexFit.loose,

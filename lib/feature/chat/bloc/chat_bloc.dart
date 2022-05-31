@@ -8,8 +8,9 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../../core/data/config_repository.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
-import '../../../models/message.dart';
 import '../../../utils/emitter_extensions.dart';
+import '../../all_chats/models/domain/all_chats_details.dart';
+import '../models/data/message_dto.dart';
 
 part 'chat_bloc.freezed.dart';
 part 'chat_event.dart';
@@ -18,11 +19,12 @@ part 'chat_state.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final UserRepository _userRepository;
   final ConfigRepository _configRepository;
-  List<Message> messages = <Message>[];
+  List<Message> messages = [];
   late io.Socket socketIO;
   bool isLoading = true;
-  late ChatUser receiver;
-  late ChatUser currentUser;
+  late Author recipient;
+  late Author currentUser;
+  late String chatId;
   ChatBloc(this._userRepository, this._configRepository) : super(const ChatState.loading()) {
     on<InitializedChatEvent>(_onInitialized);
     on<NewMessageChatEvent>(_onNewMessage);
@@ -30,7 +32,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   FutureOr<void> _sendMessage(String text) async {
-    final String receiverChatID = receiver.id;
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
     if (currentUser == null) {
       return;
@@ -39,16 +40,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       'send_message',
       json.encode(
         {
-          'receiverChatID': receiverChatID,
-          'senderChatID': currentUser.id,
+          'chatId': chatId,
+          'userId': currentUser.id,
+          'recipientId': recipient.id,
           'content': text,
         },
       ),
     );
-  }
-
-  List<Message> getMessagesForChatID(String chatID) {
-    return messages.where((msg) => msg.senderID == chatID || msg.receiverID == chatID).toList();
   }
 
   Future<void> _prepareSocket() async {
@@ -62,17 +60,48 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
-          .setExtraHeaders({'chatId': currentUser.id})
+          .setExtraHeaders({
+            'chatId': chatId,
+            'userId': currentUser.id,
+            'recipientId': recipient.id,
+          })
           .build(),
     );
 
     socketIO.on('receive_message', (jsonData) {
-      final Message message =
-          Message(jsonData['content'], jsonData['senderChatID'], jsonData['receiverChatID']);
-      add(ChatEvent.newMessage(message: message));
+      final MessageDto message = MessageDto.fromJson(jsonData);
+      if (!isClosed) {
+        add(
+          ChatEvent.newMessage(
+            message: Message(
+              author: currentUser.id == message.userId
+                  ? Author(
+                      name: currentUser.name,
+                      id: currentUser.id,
+                      gender: currentUser.gender,
+                      lastOnline: DateTime.now(),
+                    )
+                  : recipient,
+              content: MessageContent(text: message.content),
+              sentDateTime: DateTime.now(),
+            ),
+          ),
+        );
+      }
     });
 
     socketIO.connect();
+
+    socketIO.emit(
+      'join_chat',
+      json.encode(
+        {
+          'chatId': chatId,
+          'userId': currentUser.id,
+          'recipientId': recipient.id,
+        },
+      ),
+    );
   }
 
   FutureOr<void> _onInitialized(InitializedChatEvent event, Emitter<ChatState> emit) async {
@@ -80,8 +109,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentUser == null) {
       return;
     }
-    this.currentUser = currentUser;
-    receiver = event.receiver;
+    this.currentUser = Author(
+      name: currentUser.name,
+      id: currentUser.id,
+      gender: currentUser.gender,
+      lastOnline: DateTime.now().toUtc(),
+    );
+    recipient = event.recipient;
+    chatId = event.chatId;
     await _prepareSocket();
     emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.id));
   }
@@ -102,5 +137,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return;
     }
     await _sendMessage(text);
+  }
+
+  @override
+  Future<void> close() {
+    socketIO.dispose();
+    return super.close();
   }
 }
