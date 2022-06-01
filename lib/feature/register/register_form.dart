@@ -23,6 +23,7 @@ class RegisterForm extends StatelessWidget {
       child: Column(
         children: [
           DesignTextField(
+            key: Key('username_input'),
             label: 'Username',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -42,6 +43,7 @@ class RegisterForm extends StatelessWidget {
                 flex: 1,
                 fit: FlexFit.tight,
                 child: MaterialButton(
+                  key: Key('meet_neighbors_button'),
                   child: const Text('Meet your neighbors'),
                   onPressed: isLoading
                       ? null

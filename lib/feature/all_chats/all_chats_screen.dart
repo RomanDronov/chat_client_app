@@ -32,6 +32,7 @@ class AllChatsPage extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('All Chats'),
+              key: Key('all_chats'),
               automaticallyImplyLeading: false,
               leading: IconButton(
                 icon: const Icon(Icons.person),

@@ -27,16 +27,16 @@ class SignInForm extends StatelessWidget {
       child: Column(
         children: [
           DesignTextField(
-            label: 'Email',
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            controller: emailController,
-            isEnabled: !isLoading,
-            errorController: emailErrorController,
-            onChanged: (_) {
-              emailErrorController.value = null;
-            },
-          ),
+              label: 'Email',
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              controller: emailController,
+              isEnabled: !isLoading,
+              errorController: emailErrorController,
+              onChanged: (_) {
+                emailErrorController.value = null;
+              },
+              key: Key('email_key')),
           const SizedBox(height: 8),
           DesignTextField(
             label: 'Password',
@@ -50,6 +50,7 @@ class SignInForm extends StatelessWidget {
             onChanged: (_) {
               passwordErrorController.value = null;
             },
+            key: Key('password_key'),
           ),
           const SizedBox(height: 16),
           Row(
@@ -60,6 +61,7 @@ class SignInForm extends StatelessWidget {
                 flex: 1,
                 fit: FlexFit.tight,
                 child: MaterialButton(
+                  key: Key('sign_in_button'),
                   child: const Text('Sign in'),
                   onPressed: isLoading
                       ? null
