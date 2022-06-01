@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/design/widgets/section_header.dart';
+import '../../core/language/bloc/language_bloc.dart';
 import '../../main.dart';
 import '../../models/gender.dart';
-import '../../utils/string.dart';
+import '../../utils/language_utils.dart';
 import '../start_up/start_up_screen.dart';
 import 'bloc/profile_bloc.dart';
 import 'gender_bottom_sheet.dart';
+import 'language_bottom_sheet.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations localizations = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => ProfileBloc(userRepository)..add(const ProfileEvent.initialized()),
       child: BlocConsumer<ProfileBloc, ProfileState>(
         builder: (BuildContext context, ProfileState state) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Profile'),
+              title: Text(localizations.profile),
               automaticallyImplyLeading: true,
             ),
             body: state.maybeMap(
@@ -55,11 +59,11 @@ class ProfileScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 24),
-                      const SectionHeader(title: 'Settings'),
+                      SectionHeader(title: localizations.settings),
                       ListTile(
                         leading: const Icon(Icons.female),
-                        title: Text(state.user.gender.name.capitalize()),
-                        subtitle: const Text('Gender'),
+                        title: Text(state.user.gender.localize(context)),
+                        subtitle: Text(localizations.gender),
                         trailing: const Icon(Icons.navigate_next),
                         onTap: () {
                           showModalBottomSheet(
@@ -74,9 +78,42 @@ class ProfileScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 72, right: 16),
+                        child: Divider(height: 1, thickness: 1),
+                      ),
+                      BlocBuilder<LanguageBloc, LanguageState>(
+                        builder: (context, state) {
+                          return ListTile(
+                            leading: const Icon(Icons.translate),
+                            title: Text(getLanguageNameByLocale(context, state.locale)),
+                            subtitle: Text(localizations.language),
+                            trailing: const Icon(Icons.navigate_next),
+                            onTap: () {
+                              final List<Locale> locales =
+                                  context.read<LanguageBloc>().state.locales;
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (_) => LanguageBottomSheet(
+                                  locales: locales,
+                                  onLocaleSelected: (Locale locale) {
+                                    context
+                                        .read<LanguageBloc>()
+                                        .add(LanguageEvent.localeChanged(locale: locale));
+                                  },
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 72, right: 16),
+                        child: Divider(height: 1, thickness: 1),
+                      ),
                       ListTile(
                         leading: const Icon(Icons.logout),
-                        title: const Text('Log out'),
+                        title: Text(localizations.logOut),
                         onTap: () {
                           context.read<ProfileBloc>().add(const ProfileEvent.logOutPressed());
                         },

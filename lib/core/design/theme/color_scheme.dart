@@ -8,8 +8,8 @@ final ColorScheme colorSchemeLight = ColorScheme(
   onSecondary: Colors.black,
   error: Colors.red.shade700,
   onError: Colors.white,
-  background: Colors.grey.shade300,
+  background: Colors.white,
   onBackground: Colors.black,
-  surface: Colors.grey.shade100,
+  surface: Colors.white,
   onSurface: Colors.black,
 );

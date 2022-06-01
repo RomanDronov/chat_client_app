@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../models/message.dart';
+import '../../all_chats/models/domain/all_chats_details.dart';
 import '../bloc/chat_bloc.dart';
 import 'current_user_message.dart';
 import 'other_user_message.dart';
@@ -15,41 +15,56 @@ class Chat extends HookWidget {
     final ScrollController scrollController = useScrollController();
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: BlocConsumer<ChatBloc, ChatState>(
-        builder: (context, state) {
-          return state.maybeMap(
-            content: (ContentChatState state) {
-              return ListView.builder(
-                itemCount: state.content.messages.length + 1,
-                controller: scrollController,
-                reverse: true,
-                itemBuilder: (BuildContext context, int index) {
-                  final int length = state.content.messages.length;
-                  if (index == 0) {
-                    return const SizedBox(height: 16);
-                  }
-                  index -= 1;
-                  final Message message = state.content.messages[length - index - 1];
-                  return message.senderID != state.currentUserId
-                      ? OtherUserMessage(message: message.text)
-                      : CurrentUserMessage(message: message.text);
-                },
-              );
-            },
-            orElse: Container.new,
-          );
-        },
-        listener: (context, state) {
-          state.mapOrNull(
-            scrollToIndex: (state) {
-              scrollController.animateTo(
-                0.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOut,
-              );
-            },
-          );
-        },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.primary.withOpacity(0.01),
+            ],
+          ),
+        ),
+        child: BlocConsumer<ChatBloc, ChatState>(
+          builder: (context, state) {
+            return state.maybeMap(
+              content: (ContentChatState state) {
+                return ListView.builder(
+                  itemCount: state.content.messages.length + 1,
+                  controller: scrollController,
+                  reverse: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    final int length = state.content.messages.length;
+                    if (index == 0) {
+                      return const SizedBox(height: 16);
+                    }
+                    index -= 1;
+                    final Message message = state.content.messages[length - index - 1];
+                    return message.author.id != state.currentUserId
+                        ? OtherUserMessage(
+                            message: message.content.text,
+                            author: message.author,
+                          )
+                        : CurrentUserMessage(message: message.content.text);
+                  },
+                );
+              },
+              orElse: Container.new,
+            );
+          },
+          listener: (context, state) {
+            state.mapOrNull(
+              scrollToIndex: (state) {
+                scrollController.animateTo(
+                  0.0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

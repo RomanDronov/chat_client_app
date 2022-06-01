@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DesignBanner extends StatelessWidget {
-  const DesignBanner({Key? key}) : super(key: key);
+  const DesignBanner({Key? key, required this.title, required this.subtitle}) : super(key: key);
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +39,10 @@ class DesignBanner extends StatelessWidget {
                       child: Center(
                         child: ListTile(
                           title: Text(
-                            'Meet neighbors',
+                            title,
                             style: Theme.of(context).textTheme.headline4,
                           ),
-                          subtitle: const Text('13 online within 500 meters'),
+                          subtitle: Text(subtitle),
                         ),
                       ),
                     ),
