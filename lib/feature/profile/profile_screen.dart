@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -60,6 +62,31 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       SectionHeader(title: localizations.settings),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Preferred distance: ${state.user.distance}km',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Platform.isIOS ? 8 : 0),
+                        child: Slider.adaptive(
+                          min: 5,
+                          max: 1000,
+                          divisions: 199,
+                          label: 'Preferred distance',
+                          value: state.user.distance.toDouble(),
+                          onChanged: (newDistance) {
+                            final roundedDistance = newDistance.toInt();
+                            context.read<ProfileBloc>().add(
+                                  ProfileEvent.distanceUpdatePressed(
+                                    distance: roundedDistance,
+                                  ),
+                                );
+                          },
+                        ),
+                      ),
                       ListTile(
                         leading: const Icon(Icons.female),
                         title: Text(state.user.gender.localize(context)),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../core/design/alert/alert.dart';
 import '../../core/design/alert/alert_description.dart';
@@ -11,6 +12,7 @@ import '../../core/design/widgets/banner.dart';
 import '../../core/design/widgets/section_header.dart';
 import '../../main.dart';
 import '../chat/chat_page.dart';
+import '../group_chat/group_chat_page.dart';
 import '../profile/profile_screen.dart';
 import 'bloc/all_chats_bloc.dart';
 import 'mates_list.dart';
@@ -30,8 +32,11 @@ class AllChatsPage extends StatelessWidget {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: BlocProvider<AllChatsBloc>(
-        create: (_) =>
-            AllChatsBloc(allChatsService, userRepository)..add(const AllChatsEvent.initialized()),
+        create: (_) => AllChatsBloc(
+          allChatsService,
+          userRepository,
+          locationService,
+        )..add(const AllChatsEvent.initialized()),
         child: BlocConsumer<AllChatsBloc, AllChatsState>(
           buildWhen: (_, AllChatsState current) => current.map(
             loading: (_) => true,
@@ -40,6 +45,10 @@ class AllChatsPage extends StatelessWidget {
             openProfile: (_) => false,
             showWarningAlert: (_) => false,
             failure: (_) => true,
+            openGroupChat: (_) => false,
+            showLocationDisabledAlert: (_) => false,
+            showLocationPermissionAlert: (_) => false,
+            showUnknownFailureAlert: (_) => false,
           ),
           builder: (BuildContext context, AllChatsState state) {
             return Scaffold(
@@ -84,6 +93,9 @@ class AllChatsPage extends StatelessWidget {
                         title: 'Meet neighbors',
                         subtitle:
                             '${state.details.locationChat.currentlyOnline} online within ${state.details.locationChat.distanceMeters} meters',
+                        onTap: () {
+                          context.read<AllChatsBloc>().add(const AllChatsEvent.groupChatPressed());
+                        },
                       ),
                       const SectionHeader(title: 'Mates'),
                       if (state.details.privateChats.isNotEmpty)
@@ -112,6 +124,46 @@ class AllChatsPage extends StatelessWidget {
                   builder: (context) => const ProfileScreen(),
                 ),
               ),
+              openGroupChat: (state) => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => GroupChatPage(position: state.position),
+                ),
+              ),
+              showLocationDisabledAlert: (state) {
+                final AlertDescription description = AlertDescription(
+                  type: AlertType.warning,
+                  title: 'Where are you?',
+                  description:
+                      'Please enable the location on your device so we can find your neighbors',
+                  isDismissible: false,
+                  firstButton: const AlertButton(
+                    label: 'Location settings',
+                    onPressed: Geolocator.openLocationSettings,
+                  ),
+                  secondButton: AlertButton(
+                    label: 'Maybe later',
+                    onPressed: () {},
+                  ),
+                );
+                showDesignAlert(context, description);
+              },
+              showLocationPermissionAlert: (state) {
+                final AlertDescription description = AlertDescription(
+                  type: AlertType.warning,
+                  title: 'Where are you?',
+                  description: 'Please give us location permission so we can find your neighbors',
+                  isDismissible: false,
+                  firstButton: const AlertButton(
+                    label: 'App settings',
+                    onPressed: Geolocator.openAppSettings,
+                  ),
+                  secondButton: AlertButton(
+                    label: 'Maybe later',
+                    onPressed: () {},
+                  ),
+                );
+                showDesignAlert(context, description);
+              },
               showWarningAlert: (state) {
                 final AlertDescription description = AlertDescription(
                   type: AlertType.warning,
@@ -123,6 +175,19 @@ class AllChatsPage extends StatelessWidget {
                     onPressed: () {
                       context.read<AllChatsBloc>().add(state.retryEvent);
                     },
+                  ),
+                );
+                showDesignAlert(context, description);
+              },
+              showUnknownFailureAlert: (state) {
+                final AlertDescription description = AlertDescription(
+                  type: AlertType.warning,
+                  title: 'Something went wrong',
+                  description: 'Please try again or do it later',
+                  isDismissible: false,
+                  firstButton: AlertButton(
+                    label: 'Close',
+                    onPressed: () {},
                   ),
                 );
                 showDesignAlert(context, description);

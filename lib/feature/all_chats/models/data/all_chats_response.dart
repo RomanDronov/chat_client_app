@@ -8,68 +8,79 @@ part 'all_chats_response.g.dart';
 
 @JsonSerializable()
 class GetAllChatsResponse {
-  final LocationChat locationChat;
-  final List<PrivateChat> privateChats;
+  final LocationChatDto locationChat;
+  final List<PrivateChatDto> privateChats;
 
   GetAllChatsResponse(this.locationChat, this.privateChats);
 
   factory GetAllChatsResponse.fromJson(Map<String, dynamic> json) =>
       _$GetAllChatsResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GetAllChatsResponseToJson(this);
 }
 
 @JsonSerializable()
-class LocationChat {
+class LocationChatDto {
   final int currentlyOnline;
   final int distanceMeters;
-  final Message lastMessage;
+  final MessageDto lastMessage;
 
-  LocationChat(this.currentlyOnline, this.distanceMeters, this.lastMessage);
+  LocationChatDto(this.currentlyOnline, this.distanceMeters, this.lastMessage);
 
-  factory LocationChat.fromJson(Map<String, dynamic> json) => _$LocationChatFromJson(json);
+  factory LocationChatDto.fromJson(Map<String, dynamic> json) => _$LocationChatDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LocationChatDtoToJson(this);
 }
 
 @JsonSerializable()
-class Message {
-  final Author author;
-  final MessageContent content;
+class MessageDto {
+  final AuthorDto author;
+  final MessageContentDto content;
   final DateTime sentDateTimeUtc;
 
-  Message(this.author, this.content, this.sentDateTimeUtc);
+  MessageDto(this.author, this.content, this.sentDateTimeUtc);
 
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
+  factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MessageDtoToJson(this);
 }
 
 @JsonSerializable()
-class PrivateChat {
+class PrivateChatDto {
   final String id;
-  final Author recipient1;
-  final Author recipient2;
-  final Message lastMessage;
+  final AuthorDto recipient1;
+  final AuthorDto recipient2;
+  final MessageDto lastMessage;
 
-  PrivateChat(this.id, this.recipient1, this.recipient2, this.lastMessage);
+  PrivateChatDto(this.id, this.recipient1, this.recipient2, this.lastMessage);
 
-  factory PrivateChat.fromJson(Map<String, dynamic> json) => _$PrivateChatFromJson(json);
+  factory PrivateChatDto.fromJson(Map<String, dynamic> json) => _$PrivateChatDtoFromJson(json);
 }
 
 @JsonSerializable()
-class MessageContent {
+class MessageContentDto {
   final String text;
 
-  MessageContent(this.text);
+  MessageContentDto(this.text);
 
-  factory MessageContent.fromJson(Map<String, dynamic> json) => _$MessageContentFromJson(json);
+  factory MessageContentDto.fromJson(Map<String, dynamic> json) =>
+      _$MessageContentDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MessageContentDtoToJson(this);
 }
 
 @JsonSerializable()
-class Author {
+class AuthorDto {
   final String name;
   final String id;
   final String gender;
   final DateTime lastOnline;
 
-  Author(this.name, this.id, this.gender, this.lastOnline);
+  AuthorDto(this.name, this.id, this.gender, this.lastOnline);
 
-  factory Author.fromJson(Map<String, dynamic> json) => _$AuthorFromJson(json);
+  factory AuthorDto.fromJson(Map<String, dynamic> json) => _$AuthorDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AuthorDtoToJson(this);
 }
 
 extension GetAllChatsResponseExtension on GetAllChatsResponse {
@@ -81,7 +92,7 @@ extension GetAllChatsResponseExtension on GetAllChatsResponse {
           distanceMeters: locationChat.distanceMeters,
           lastMessage: locationChat.lastMessage.toDomain(),
         ),
-        privateChats: privateChats.map((PrivateChat chat) {
+        privateChats: privateChats.map((PrivateChatDto chat) {
           return domain.PrivateChat(
             id: chat.id,
             recipient1: chat.recipient1.toDomain(),
@@ -94,7 +105,7 @@ extension GetAllChatsResponseExtension on GetAllChatsResponse {
   }
 }
 
-extension MessageExtension on Message {
+extension MessageExtension on MessageDto {
   domain.Message toDomain() {
     return domain.Message(
       content: domain.MessageContent(text: content.text),
@@ -104,7 +115,7 @@ extension MessageExtension on Message {
   }
 }
 
-extension AuthorExtension on Author {
+extension AuthorExtension on AuthorDto {
   domain.Author toDomain() {
     return domain.Author(
       id: id,

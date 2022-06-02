@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/data/user_repository.dart';
@@ -18,6 +19,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<InitializedProfileEvent>(_onInitialized);
     on<LogOutPressedProfileEvent>(_onLogOutPressed);
     on<GenderChangedProfileEvent>(_onGenderChanged);
+    on<DistanceUpdatePressedProfileEvent>(_onDistanceUpdatePressed, transformer: restartable());
   }
 
   FutureOr<void> _onInitialized(InitializedProfileEvent event, Emitter<ProfileState> emit) async {
@@ -40,5 +42,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     await _userRepository.updateGender(gender: event.gender);
     final ChatUser currentUser = await _userRepository.getCurrentUser();
     emit(ProfileState.initial(user: currentUser));
+  }
+
+  FutureOr<void> _onDistanceUpdatePressed(
+    DistanceUpdatePressedProfileEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    final ProfileState oldState = state;
+    if (oldState is InitialProfileState) {
+      emit(oldState.copyWith(user: oldState.user.copyWith(distance: event.distance)));
+    }
+    await Future.delayed(const Duration(milliseconds: 500));
+    await _userRepository.updateDistance(distance: event.distance);
   }
 }

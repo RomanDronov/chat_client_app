@@ -7,6 +7,7 @@ class ChatUserConverter {
     final String email = data['email'] ?? '';
     final String userId = data['id'] ?? '';
     final String gender = data['gender'] ?? '';
+    final int distance = int.tryParse((data['distance'].toString())) ?? 5;
     return ChatUser(
       name: name,
       id: userId,
@@ -15,6 +16,7 @@ class ChatUserConverter {
         (element) => element.name == gender,
         orElse: () => Gender.cat,
       ),
+      distance: distance
     );
   }
 }

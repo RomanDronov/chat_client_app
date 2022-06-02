@@ -3,33 +3,33 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../core/data/config_repository.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
+import '../../../models/gender.dart';
 import '../../../utils/emitter_extensions.dart';
+import '../../all_chats/models/data/all_chats_response.dart';
 import '../../all_chats/models/domain/all_chats_details.dart';
-import '../models/data/message_dto.dart';
 
-part 'chat_bloc.freezed.dart';
-part 'chat_event.dart';
-part 'chat_state.dart';
+part 'group_chat_bloc.freezed.dart';
+part 'group_chat_event.dart';
+part 'group_chat_state.dart';
 
-class ChatBloc extends Bloc<ChatEvent, ChatState> {
+class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
   final UserRepository _userRepository;
   final ConfigRepository _configRepository;
   List<Message> messages = [];
   late io.Socket socketIO;
   bool isLoading = true;
-  late Author recipient;
   late Author currentUser;
-  late String chatId;
-  ChatBloc(this._userRepository, this._configRepository) : super(const ChatState.loading()) {
-    on<InitializedChatEvent>(_onInitialized);
-    on<NewMessageChatEvent>(_onNewMessage);
-    on<SendMessageChatEvent>(_onSendMessage);
+  GroupChatBloc(this._userRepository, this._configRepository)
+      : super(const GroupChatState.loading()) {
+    on<InitializedGroupChatEvent>(_onInitialized);
+    on<NewMessageGroupChatEvent>(_onNewMessage);
+    on<SendMessageGroupChatEvent>(_onSendMessage);
   }
 
   FutureOr<void> _sendMessage(String text) async {
@@ -38,19 +38,25 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return;
     }
     socketIO.emit(
-      'send_message',
+      'send_message_global',
       json.encode(
-        {
-          'chatId': chatId,
-          'userId': currentUser.id,
-          'recipientId': recipient.id,
-          'content': text,
-        },
+        MessageDto(
+          AuthorDto(
+            currentUser.name,
+            currentUser.id,
+            currentUser.gender.name,
+            DateTime.now().toUtc(),
+          ),
+          MessageContentDto(
+            text,
+          ),
+          DateTime.now().toUtc(),
+        ).toJson(),
       ),
     );
   }
 
-  Future<void> _prepareSocket() async {
+  Future<void> _prepareSocket(Position position) async {
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
     if (currentUser == null) {
       return;
@@ -62,29 +68,26 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           .setTransports(['websocket'])
           .disableAutoConnect()
           .setExtraHeaders({
-            'chatId': chatId,
             'userId': currentUser.id,
-            'recipientId': recipient.id,
+            'position': {'latitude': position.latitude, 'longitude': position.longitude},
           })
           .build(),
     );
 
-    socketIO.on('receive_message', (jsonData) {
+    socketIO.on('receive_message_global', (jsonData) {
       final MessageDto message = MessageDto.fromJson(jsonData);
       if (!isClosed) {
         add(
-          ChatEvent.newMessage(
+          GroupChatEvent.newMessage(
             message: Message(
-              author: currentUser.id == message.userId
-                  ? Author(
-                      name: currentUser.name,
-                      id: currentUser.id,
-                      gender: currentUser.gender,
-                      lastOnline: DateTime.now(),
-                    )
-                  : recipient,
-              content: MessageContent(text: message.content),
-              sentDateTime: DateTime.now(),
+              author: Author(
+                name: message.author.name,
+                id: message.author.id,
+                gender: getGenderByCodeOrElse(message.author.gender, Gender.cat),
+                lastOnline: message.author.lastOnline,
+              ),
+              content: MessageContent(text: message.content.text),
+              sentDateTime: message.sentDateTimeUtc,
             ),
           ),
         );
@@ -94,55 +97,51 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     socketIO.connect();
 
     socketIO.emit(
-      'join_chat',
+      'join_chat_global',
       json.encode(
         {
-          'chatId': chatId,
           'userId': currentUser.id,
-          'recipientId': recipient.id,
+          'position': {
+            'latitude': position.latitude,
+            'longitude': position.longitude,
+          },
         },
       ),
     );
   }
 
-  FutureOr<void> _onInitialized(InitializedChatEvent event, Emitter<ChatState> emit) async {
+  FutureOr<void> _onInitialized(
+    InitializedGroupChatEvent event,
+    Emitter<GroupChatState> emit,
+  ) async {
     final ChatUser? currentUser = await _userRepository.getCurrentUser();
     if (currentUser == null) {
       return;
     }
-
     this.currentUser = Author(
       name: currentUser.name,
       id: currentUser.id,
       gender: currentUser.gender,
       lastOnline: DateTime.now().toUtc(),
     );
-    recipient = event.recipient;
-    if (event.chatId == null) {
-      final http.Response response = await http.get(
-        Uri.parse(
-          '${_configRepository.getChatHost()}/get-chat-id?userId=${currentUser.id}&recipientId=${recipient.id}',
-        ),
-      );
-      chatId = jsonDecode(response.body)['chatId'];
-    } else {
-      chatId = event.chatId!;
-    }
-    await _prepareSocket();
-    emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.id));
+    await _prepareSocket(event.position);
+    emit(GroupChatState.content(content: ChatContent(messages), currentUserId: currentUser.id));
   }
 
-  FutureOr<void> _onNewMessage(NewMessageChatEvent event, Emitter<ChatState> emit) {
+  FutureOr<void> _onNewMessage(NewMessageGroupChatEvent event, Emitter<GroupChatState> emit) {
     messages.add(event.message);
-    final contentState = ChatState.content(
+    final contentState = GroupChatState.content(
       content: ChatContent(List.from(messages, growable: false)),
       currentUserId: currentUser.id,
     );
-    final scrollState = ChatState.scrollToIndex(index: messages.length - 1);
+    final scrollState = GroupChatState.scrollToIndex(index: messages.length - 1);
     emit.sync(contentState, scrollState);
   }
 
-  FutureOr<void> _onSendMessage(SendMessageChatEvent event, Emitter<ChatState> emit) async {
+  FutureOr<void> _onSendMessage(
+    SendMessageGroupChatEvent event,
+    Emitter<GroupChatState> emit,
+  ) async {
     final String text = event.text.trim();
     if (text.isEmpty) {
       return;

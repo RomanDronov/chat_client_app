@@ -103,6 +103,18 @@ class UserRepository {
     await getCurrentUser(isForce: true);
   }
 
+  Future<void> updateDistance({required int distance}) async {
+    final ChatUser currentUser = await getCurrentUser(isForce: true);
+    final firestoreInstance = FirebaseFirestore.instance;
+    await firestoreInstance.collection('users').doc(currentUser.id).set(
+      {
+        'distance': distance,
+      },
+      SetOptions(merge: true),
+    );
+    await getCurrentUser(isForce: true);
+  }
+
   Future<void> _storeUserInfoInFirestore(
     String name,
     String email,
@@ -116,4 +128,6 @@ class UserRepository {
       'gender': Gender.cat.name,
     });
   }
+
+  
 }

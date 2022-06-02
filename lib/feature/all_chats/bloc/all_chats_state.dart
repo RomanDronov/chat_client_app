@@ -16,9 +16,16 @@ class AllChatsState with _$AllChatsState {
     required String chatId,
   }) = OpenChatAllChatsState;
   const factory AllChatsState.openProfile() = OpenProfileAllChatsState;
+  const factory AllChatsState.openGroupChat({
+    required Position position,
+  }) = OpenGroupChatAllChatsState;
   const factory AllChatsState.showWarningAlert({
     required String title,
     required String description,
     required AllChatsEvent retryEvent,
   }) = ShowWarningAlertAllChatsState;
+  const factory AllChatsState.showLocationPermissionAlert() =
+      ShowLocationPermissionAlertAllChatsState;
+  const factory AllChatsState.showLocationDisabledAlert() = ShowLocationDisabledAlertAllChatsState;
+  const factory AllChatsState.showUnknownFailureAlert() = ShowUnknownFailureAlertAllChatsState;
 }

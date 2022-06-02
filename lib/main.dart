@@ -8,6 +8,7 @@ import 'app/chat_app.dart';
 import 'core/data/config_repository.dart';
 import 'core/data/user_repository.dart';
 import 'core/domain/avatar_provider.dart';
+import 'core/domain/location/location_service.dart';
 import 'feature/all_chats/data/all_chats_repository.dart';
 import 'feature/all_chats/domain/all_chats_service.dart';
 import 'firebase_options.dart';
@@ -21,6 +22,7 @@ final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.instance;
 final ConfigRepository configRepository = ConfigRepository(logger, firebaseRemoteConfig);
 final AllChatsRepository allChatsRepository = AllChatsRepository(configRepository);
 final AllChatsService allChatsService = AllChatsService(userRepository, allChatsRepository);
+final LocationService locationService = LocationService(logger);
 late final SharedPreferences sharedPreferences;
 
 void main() async {

@@ -11,5 +11,6 @@ class ChatUser with _$ChatUser {
     required String id,
     required String email,
     required Gender gender,
+    required int distance,
   }) = _ChatUser;
 }

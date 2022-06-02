@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DesignBanner extends StatelessWidget {
-  const DesignBanner({Key? key, required this.title, required this.subtitle}) : super(key: key);
+  const DesignBanner({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  }) : super(key: key);
   final String title;
   final String subtitle;
+  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,7 @@ class DesignBanner extends StatelessWidget {
                     color: Colors.transparent,
                     child: InkWell(
                       splashColor: Theme.of(context).colorScheme.secondary,
-                      onTap: () {},
+                      onTap: onTap,
                       child: Center(
                         child: ListTile(
                           title: Text(

@@ -31,10 +31,12 @@ class DesignAlert extends StatelessWidget {
                     Text(
                       description.title,
                       style: Theme.of(context).textTheme.headline6,
+                      textAlign: TextAlign.center,
                     ),
                     Text(
                       description.description,
                       style: Theme.of(context).textTheme.bodyText1,
+                      textAlign: TextAlign.center,
                     ),
                     description.firstButton.toAlertButton(context),
                     if (secondButton != null) ...[

@@ -8,4 +8,5 @@ class AllChatsEvent with _$AllChatsEvent {
     required String chatId,
   }) = RecipientPressedAllChatsEvent;
   const factory AllChatsEvent.profilePressed() = ProfilePressedAllChatEvent;
+  const factory AllChatsEvent.groupChatPressed() = GroupChatPressedAllChatEvent;
 }

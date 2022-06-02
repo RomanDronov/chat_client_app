@@ -25,6 +25,8 @@ dependencies:
   intl: ^0.17.0
   json_serializable: ^6.2.0
   json_annotation: ^4.5.0
+  geolocator: ^8.2.1
+  bloc_concurrency: ^0.2.0
 
 dev_dependencies:
   flutter_test:
@@ -38,7 +40,6 @@ dev_dependencies:
   freezed: ^2.0.2
   flutter_driver:
     sdk: flutter
-  test:
 
 flutter:
   generate: true

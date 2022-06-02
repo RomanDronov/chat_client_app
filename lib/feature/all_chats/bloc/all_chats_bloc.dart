@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:geolocator_platform_interface/src/models/position.dart';
 
 import '../../../core/data/user_repository.dart';
+import '../../../core/domain/location/location_service.dart';
+import '../../../core/domain/location/models/get_current_location_result.dart';
 import '../../../core/util/stream_socket.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
@@ -18,10 +21,13 @@ part 'all_chats_state.dart';
 class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   final AllChatsService _service;
   final UserRepository _userRepository;
-  AllChatsBloc(this._service, this._userRepository) : super(const AllChatsState.loading()) {
+  final LocationService _locationService;
+  AllChatsBloc(this._service, this._userRepository, this._locationService)
+      : super(const AllChatsState.loading()) {
     on<InitializedAllChatsEvent>(_onInitialized);
     on<RecipientPressedAllChatsEvent>(_onUserPressed);
     on<ProfilePressedAllChatEvent>(_onProfilePressed);
+    on<GroupChatPressedAllChatEvent>(_onGroupChatPressed);
   }
 
   FutureOr<void> _onUserPressed(
@@ -59,5 +65,29 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
 
   FutureOr<void> _onProfilePressed(ProfilePressedAllChatEvent event, Emitter<AllChatsState> emit) {
     emit.sync(state, const AllChatsState.openProfile());
+  }
+
+  FutureOr<void> _onGroupChatPressed(
+    GroupChatPressedAllChatEvent event,
+    Emitter<AllChatsState> emit,
+  ) async {
+    final GetCurrentLocationResult result = await _locationService.getCurrentLocation();
+    result.when(
+      success: (Position position) {
+        emit.sync(state, AllChatsState.openGroupChat(position: position));
+      },
+      disabled: () {
+        emit.sync(state, const AllChatsState.showLocationDisabledAlert());
+      },
+      denied: () {
+        emit.sync(state, const AllChatsState.showLocationPermissionAlert());
+      },
+      deniedForever: () {
+        emit.sync(state, const AllChatsState.showLocationPermissionAlert());
+      },
+      unknownFailure: () {
+        emit.sync(state, const AllChatsState.showUnknownFailureAlert());
+      },
+    );
   }
 }
