@@ -2,28 +2,21 @@ import 'dart:convert';
 
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import '../../../core/data/config_repository.dart';
+import '../../../core/data/socket_provider.dart';
 import '../../../core/util/stream_socket.dart';
 import '../models/data/all_chats_response.dart';
 import '../models/domain/get_all_chats_details_result.dart';
 
 class AllChatsRepository {
-  final ConfigRepository _configRepository;
+  final SocketProvider _socketProvider;
 
-  AllChatsRepository(this._configRepository);
+  AllChatsRepository(this._socketProvider);
 
   Future<PayloadStream<GetAllChatsDetailsResult>> subscribeToDetails({
     required String currentUserId,
   }) async {
     PayloadStream<GetAllChatsDetailsResult> payloadStream = PayloadStream();
-    final io.Socket socket = io.io(
-      _configRepository.getChatHost(),
-      io.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .setExtraHeaders({'userId': currentUserId})
-          .build(),
-    );
+    final io.Socket socket = _socketProvider.socket!;
 
     socket.onConnect((data) {
       socket.emit(
@@ -46,17 +39,19 @@ class AllChatsRepository {
       },
     );
 
-    socket.onError((data) => payloadStream.addPayload(const GetAllChatsDetailsResult.failure()));
+    socket.onError((data) {
+      payloadStream.addPayload(const GetAllChatsDetailsResult.failure());
+    });
 
     socket.onConnectTimeout(
-      (data) => payloadStream.addPayload(const GetAllChatsDetailsResult.failure()),
+      (data) {
+        payloadStream.addPayload(const GetAllChatsDetailsResult.failure());
+      },
     );
     socket.onDisconnect((data) {
       payloadStream.addPayload(const GetAllChatsDetailsResult.failure());
       payloadStream.dispose();
     });
-
-    socket.connect();
 
     return payloadStream;
   }

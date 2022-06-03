@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../main.dart';
-import '../all_chats/models/domain/all_chats_details.dart';
 import 'bloc/group_chat_bloc.dart';
 import 'widgets/chat.dart';
 import 'widgets/new_message.dart';
@@ -17,11 +16,11 @@ class GroupChatPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => GroupChatBloc(
         userRepository,
-        configRepository,
+        socketProvider,
       )..add(GroupChatEvent.initialized(position: position)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Your neighborhood'),
+          title: const Text('Your neighborhood'),
           automaticallyImplyLeading: true,
         ),
         body: Column(

@@ -17,7 +17,6 @@ class LocationChat with _$LocationChat {
   const factory LocationChat({
     required int currentlyOnline,
     required int distanceMeters,
-    required Message lastMessage,
   }) = _LocationChat;
 }
 
@@ -49,10 +48,18 @@ class MessageContent with _$MessageContent {
 
 @freezed
 class Author with _$Author {
+  const Author._();
   const factory Author({
     required String name,
     required String id,
     required Gender gender,
     required DateTime lastOnline,
   }) = _Author;
+
+  bool get isOnline {
+    final DateTime now = DateTime.now().toUtc();
+    final DateTime lastOnline = this.lastOnline.toUtc();
+    final Duration difference = now.difference(lastOnline);
+    return difference.inSeconds < 60;
+  }
 }

@@ -36,6 +36,7 @@ class AllChatsPage extends StatelessWidget {
           allChatsService,
           userRepository,
           locationService,
+          socketProvider,
         )..add(const AllChatsEvent.initialized()),
         child: BlocConsumer<AllChatsBloc, AllChatsState>(
           buildWhen: (_, AllChatsState current) => current.map(
@@ -92,7 +93,7 @@ class AllChatsPage extends StatelessWidget {
                       DesignBanner(
                         title: 'Meet neighbors',
                         subtitle:
-                            '${state.details.locationChat.currentlyOnline} online within ${state.details.locationChat.distanceMeters} meters',
+                            '${state.details.locationChat.currentlyOnline} online within ${state.details.locationChat.distanceMeters} kilometers',
                         onTap: () {
                           context.read<AllChatsBloc>().add(const AllChatsEvent.groupChatPressed());
                         },

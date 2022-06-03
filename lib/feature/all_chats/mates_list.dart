@@ -61,15 +61,44 @@ class ChatTile extends StatelessWidget {
         : DateFormat.Hm(Localizations.localeOf(context).languageCode);
     final Author recipient = chat.recipient1.id == userId ? chat.recipient2 : chat.recipient1;
     return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: AssetImage(
-          avatarProvider.getAssetNameByUsernameAndGender(
-            recipient.name,
-            recipient.gender,
-          ),
+      leading: SizedBox(
+        width: 48,
+        height: 48,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CircleAvatar(
+                backgroundImage: AssetImage(
+                  avatarProvider.getAssetNameByUsernameAndGender(
+                    recipient.name,
+                    recipient.gender,
+                  ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                radius: 24,
+              ),
+            ),
+            if (recipient.isOnline)
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade500,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.background,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+          ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        radius: 24,
       ),
       trailing: Text(format.format(sentDateTime)),
       title: Text(recipient.name),

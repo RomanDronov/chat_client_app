@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../core/data/config_repository.dart';
+import '../../../core/data/socket_provider.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../models/gender.dart';
@@ -20,12 +21,12 @@ part 'group_chat_state.dart';
 
 class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
   final UserRepository _userRepository;
-  final ConfigRepository _configRepository;
+  final SocketProvider _socketProvider;
   List<Message> messages = [];
-  late io.Socket socketIO;
+  late io.Socket socket;
   bool isLoading = true;
   late Author currentUser;
-  GroupChatBloc(this._userRepository, this._configRepository)
+  GroupChatBloc(this._userRepository, this._socketProvider)
       : super(const GroupChatState.loading()) {
     on<InitializedGroupChatEvent>(_onInitialized);
     on<NewMessageGroupChatEvent>(_onNewMessage);
@@ -37,7 +38,7 @@ class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
     if (currentUser == null) {
       return;
     }
-    socketIO.emit(
+    socket.emit(
       'send_message_global',
       json.encode(
         MessageDto(
@@ -62,19 +63,9 @@ class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
       return;
     }
 
-    socketIO = io.io(
-      _configRepository.getChatHost(),
-      io.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .setExtraHeaders({
-            'userId': currentUser.id,
-            'position': {'latitude': position.latitude, 'longitude': position.longitude},
-          })
-          .build(),
-    );
+    socket = _socketProvider.socket!;
 
-    socketIO.on('receive_message_global', (jsonData) {
+    socket.on('receive_message_global', (jsonData) {
       final MessageDto message = MessageDto.fromJson(jsonData);
       if (!isClosed) {
         add(
@@ -94,9 +85,7 @@ class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
       }
     });
 
-    socketIO.connect();
-
-    socketIO.emit(
+    socket.emit(
       'join_chat_global',
       json.encode(
         {
@@ -151,7 +140,6 @@ class GroupChatBloc extends Bloc<GroupChatEvent, GroupChatState> {
 
   @override
   Future<void> close() {
-    socketIO.dispose();
     return super.close();
   }
 }

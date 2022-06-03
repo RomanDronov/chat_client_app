@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../core/data/config_repository.dart';
+import '../../../core/data/socket_provider.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../models/chat_user.dart';
 import '../../../utils/emitter_extensions.dart';
@@ -19,14 +20,19 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final UserRepository _userRepository;
+  final SocketProvider _socketProvider;
   final ConfigRepository _configRepository;
   List<Message> messages = [];
-  late io.Socket socketIO;
+  late io.Socket socket;
   bool isLoading = true;
   late Author recipient;
   late Author currentUser;
   late String chatId;
-  ChatBloc(this._userRepository, this._configRepository) : super(const ChatState.loading()) {
+  ChatBloc(
+    this._userRepository,
+    this._socketProvider,
+    this._configRepository,
+  ) : super(const ChatState.loading()) {
     on<InitializedChatEvent>(_onInitialized);
     on<NewMessageChatEvent>(_onNewMessage);
     on<SendMessageChatEvent>(_onSendMessage);
@@ -37,7 +43,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentUser == null) {
       return;
     }
-    socketIO.emit(
+    socket.emit(
       'send_message',
       json.encode(
         {
@@ -56,20 +62,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return;
     }
 
-    socketIO = io.io(
-      _configRepository.getChatHost(),
-      io.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .setExtraHeaders({
-            'chatId': chatId,
-            'userId': currentUser.id,
-            'recipientId': recipient.id,
-          })
-          .build(),
-    );
+    socket = _socketProvider.socket!;
 
-    socketIO.on('receive_message', (jsonData) {
+    socket.on('receive_message', (jsonData) {
       final MessageDto message = MessageDto.fromJson(jsonData);
       if (!isClosed) {
         add(
@@ -91,9 +86,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     });
 
-    socketIO.connect();
-
-    socketIO.emit(
+    socket.emit(
       'join_chat',
       json.encode(
         {
@@ -152,7 +145,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   @override
   Future<void> close() {
-    socketIO.dispose();
     return super.close();
   }
 }

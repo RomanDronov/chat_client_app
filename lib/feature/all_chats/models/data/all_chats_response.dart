@@ -23,9 +23,8 @@ class GetAllChatsResponse {
 class LocationChatDto {
   final int currentlyOnline;
   final int distanceMeters;
-  final MessageDto lastMessage;
 
-  LocationChatDto(this.currentlyOnline, this.distanceMeters, this.lastMessage);
+  LocationChatDto(this.currentlyOnline, this.distanceMeters);
 
   factory LocationChatDto.fromJson(Map<String, dynamic> json) => _$LocationChatDtoFromJson(json);
 
@@ -90,7 +89,6 @@ extension GetAllChatsResponseExtension on GetAllChatsResponse {
         locationChat: domain.LocationChat(
           currentlyOnline: locationChat.currentlyOnline,
           distanceMeters: locationChat.distanceMeters,
-          lastMessage: locationChat.lastMessage.toDomain(),
         ),
         privateChats: privateChats.map((PrivateChatDto chat) {
           return domain.PrivateChat(

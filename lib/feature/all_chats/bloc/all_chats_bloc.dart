@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:geolocator_platform_interface/src/models/position.dart';
 
+import '../../../core/data/socket_provider.dart';
 import '../../../core/data/user_repository.dart';
 import '../../../core/domain/location/location_service.dart';
 import '../../../core/domain/location/models/get_current_location_result.dart';
@@ -22,8 +23,13 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   final AllChatsService _service;
   final UserRepository _userRepository;
   final LocationService _locationService;
-  AllChatsBloc(this._service, this._userRepository, this._locationService)
-      : super(const AllChatsState.loading()) {
+  final SocketProvider _socketProvider;
+  AllChatsBloc(
+    this._service,
+    this._userRepository,
+    this._locationService,
+    this._socketProvider,
+  ) : super(const AllChatsState.loading()) {
     on<InitializedAllChatsEvent>(_onInitialized);
     on<RecipientPressedAllChatsEvent>(_onUserPressed);
     on<ProfilePressedAllChatEvent>(_onProfilePressed);
@@ -43,6 +49,7 @@ class AllChatsBloc extends Bloc<AllChatsEvent, AllChatsState> {
   ) async {
     emit(const AllChatsState.loading());
     final ChatUser user = await _userRepository.getCurrentUser(isForce: false);
+    _socketProvider.initialize(user.id);
     final PayloadStream<GetAllChatsDetailsResult> payloadStream =
         await _service.subscribeToDetails();
     await emit.forEach<GetAllChatsDetailsResult>(

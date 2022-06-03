@@ -17,6 +17,7 @@ class ChatPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => ChatBloc(
         userRepository,
+        socketProvider,
         configRepository,
       )..add(ChatEvent.initialized(recipient: recipient, chatId: chatId)),
       child: Scaffold(
