@@ -45,7 +45,10 @@ class Chat extends HookWidget {
                         ? OtherUserMessage(
                             message: message,
                           )
-                        : CurrentUserMessage(message: message.content.text);
+                        : CurrentUserMessage(
+                            message: message.content.text,
+                            sentDateTimeUtc: message.sentDateTime,
+                          );
                   },
                 );
               },

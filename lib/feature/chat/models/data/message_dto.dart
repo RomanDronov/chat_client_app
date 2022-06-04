@@ -7,9 +7,9 @@ class MessageDto {
   final String content;
   final String chatId;
   final String userId;
-  final String recipientId;
+  final DateTime sentDateTimeUtc;
 
-  MessageDto(this.content, this.chatId, this.userId, this.recipientId);
+  MessageDto(this.content, this.chatId, this.userId, this.sentDateTimeUtc);
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
 }

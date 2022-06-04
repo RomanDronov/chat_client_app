@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 final ColorScheme colorSchemeLight = ColorScheme(
   brightness: Brightness.light,
-  primary: Colors.blue.shade700,
-  onPrimary: Colors.white,
-  secondary: Colors.amber.shade700,
+  primary: Color(0xFF1976D2),
+  onPrimary: Color(0xFFFFFFFF),
+  secondary: Color(0xFFFFA000),
   onSecondary: Colors.black,
-  error: Colors.red.shade700,
+  error: Color(0xFFD32F2F),
   onError: Colors.white,
   background: Colors.white,
   onBackground: Colors.black,

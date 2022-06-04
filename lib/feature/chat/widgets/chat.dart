@@ -45,8 +45,12 @@ class Chat extends HookWidget {
                         ? OtherUserMessage(
                             message: message.content.text,
                             author: message.author,
+                            sentDateTimeUtc: message.sentDateTime,
                           )
-                        : CurrentUserMessage(message: message.content.text);
+                        : CurrentUserMessage(
+                            message: message.content.text,
+                            sentDateTimeUtc: message.sentDateTime,
+                          );
                   },
                 );
               },
@@ -56,6 +60,9 @@ class Chat extends HookWidget {
           listener: (context, state) {
             state.mapOrNull(
               scrollToIndex: (state) {
+                if (scrollController.positions.isEmpty) {
+                  return;
+                }
                 scrollController.animateTo(
                   0.0,
                   duration: const Duration(milliseconds: 200),

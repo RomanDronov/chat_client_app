@@ -121,6 +121,40 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     } else {
       chatId = event.chatId!;
     }
+
+    try {
+      final http.Response response = await http.get(
+        Uri.parse(
+          '${_configRepository.getChatHost()}/get-chat-history?chatId=$chatId',
+        ),
+      );
+
+      final jsonMessages = jsonDecode(response.body)['messages'];
+      for (final jsonMessage in jsonMessages) {
+        final MessageDto message = MessageDto.fromJson(jsonMessage);
+        if (!isClosed) {
+          add(
+            ChatEvent.newMessage(
+              message: Message(
+                author: currentUser.id == message.userId
+                    ? Author(
+                        name: currentUser.name,
+                        id: currentUser.id,
+                        gender: currentUser.gender,
+                        lastOnline: DateTime.now(),
+                      )
+                    : recipient,
+                content: MessageContent(text: message.content),
+                sentDateTime: message.sentDateTimeUtc,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (exception) {
+      messages.clear();
+    }
+
     await _prepareSocket();
     emit(ChatState.content(content: ChatContent(messages), currentUserId: currentUser.id));
   }
